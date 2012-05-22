@@ -1,0 +1,10 @@
+close data
+SELECT NF.REF, P.TIPO, NF.QTD, p.conteudo, (QTD * VAL(P.CONTEUDO)) AS TOT;
+  FROM NFVENDA NF, PROD P;
+  GROUP BY;
+    P.TIPO;
+  WHERE NF.REF = P.REF;
+  ORDER BY TIPO;
+  INTO CURSOR tmp
+  
+  

@@ -1,0 +1,4 @@
+SET DEVICE TO SCREEN
+? 'Um erro Ocorreu', MESSAGE()
+=INKEY(0)
+CANCEL

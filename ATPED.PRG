@@ -1,0 +1,18 @@
+close all
+USE PEDIC
+IF FCOUNT() = 53 THEN
+  COPY TO PEDBAK
+  create novo from xped
+  append from pedic
+  USE
+  ERASE PEDIC.DBF
+  ERASE PEDIC.CDX
+  RENAME NOVO.DBF TO PEDIC.DBF
+  USE PEDIC
+  DELETE TAG ALL
+  PACK
+  INDEX ON CGC     TAG F_CGC
+  INDEX ON PED     TAG P_PED
+ENDIF  
+CLOSE ALL
+

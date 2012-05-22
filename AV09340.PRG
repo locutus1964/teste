@@ -1,0 +1,98 @@
+* AV09600 - LIMPEZA DOS CADASTROS DE PEDIDOS (CABECALHOS E DETALHES)
+*
+? MENSAG('Copiando Notas n„o entregues para marcar respectivos Pedidos')
+USE CADNF
+  COPY STRU TO TCADNF
+  COPY TO TCADNF FOR ENT = SPACE(8)
+*
+? MENSAG('Marcando Pedidos n„o entregues para evitar exclus„o')
+USE TCADNF
+GO BOTT
+IF .NOT. (EOF() .OR. BOF())
+  GO TOP
+  CLOS DATA
+  SELE A
+  USE PEDID ORDER X_PEDREF
+  SELE B
+  USE TCADNF
+  DO WHILE .NOT. EOF()
+    STOR STR(PED,6) + REF TO KEY
+    SELE A
+    SEEK KEY
+    IF .NOT. (EOF() .OR. BOF())
+      DO WHILE KEY = STR(PED,6) + REF
+        REPL CENT WITH '*'
+        SKIP
+        LOOP
+      ENDDO
+    ENDIF
+    SELE B
+    SKIP
+  ENDDO
+ENDIF
+*
+CLOS DATA
+? MENSAG('Excluindo Itens de Pedidos liquidados... Aguarde')
+USE PEDIC
+PUBLIC ULTPED
+STOR SPACE(6) TO ULTPED
+GO BOTT
+IF .NOT. (EOF() .OR. BOF())
+   STOR PED TO ULTPED
+ENDIF
+*
+USE PEDID
+COPY TO PEDIDN FOR SAL > 0 .OR. ULTPED = PED .OR. DENT = SPACE(8)
+*
+? MENSAG('Classificando Itens de Pedidos com Saldos... Aguarde')
+USE PEDID
+  ZAP
+  INDEX ON STR(PED,6) TO PEDID.IDX
+  INDEX ON STR(PED,6) + REF TO PEDIDM.IDX
+*
+USE PEDID INDEX PEDID.IDX,PEDIDM.IDX
+  APPE FROM PEDIDN
+
+? MENSAG('Limpando Cabe‡alhos dos Pedidos liquidados... Aguarde')
+CLOS DATA
+SELE B
+USE PEDID INDEX PEDID.IDX,PEDIDM.IDX
+SELE A
+USE PEDIC ORDER P_PED
+DO WHILE !EOF()
+  STOR PED TO MPED
+  SELE B
+  SEEK MPED
+  IF (EOF() .OR. BOF())
+    SELE A
+    DELE
+  ELSE
+    SELE A
+  ENDIF
+  SKIP
+  LOOP
+ENDDO
+*
+*   P E D I D O S    -    C A B E C A L H O
+DO MENSAG WITH  'Classificando Pedidos... Aguarde'
+  USE PEDIC
+    INDEX ON STR(PED,6) TO PEDIC.IDX
+  USE PEDIC2
+    INDEX ON STR(PED,6) TO PEDIC2.IDX
+    
+*   P E D I D O S    -    I T E N S
+  USE PEDID
+    INDEX ON STR(PED,6) TO PEDID.IDX
+    INDEX ON STR(PED,6) + REF + STR(ITE,2) TO PEDIDM.IDX
+
+USE PEDIC
+PACK
+INDEX ON PED TO PEDIC.IDX
+*
+ ERASE PEDIDN.DBF
+*
+CLOS DATA
+CLEAR
+*
+RETURN
+
